@@ -1,5 +1,7 @@
 import * as chromeLauncher from 'chrome-launcher';
 import * as lighthouse from 'lighthouse';
+import { expect } from 'chai';
+import 'mocha';
 
 interface Page {
   url: string;
@@ -7,14 +9,18 @@ interface Page {
 
 interface Auditor {
   readonly timestamp: string;
-  pages: Array<object>;
+  result: Array<object>;
   queue: Array<Page>;
   addToQueue(p: Page): void;
 }
 
-class Lighthouse implements Auditor {
+class Headlight implements Auditor {
   timestamp: string;
-  pages: [];
+  result: Array<object> = [];
+  queue: Array<Page> = [];
+  addToQueue(p: Page) {
+    this.queue.push(p); 
+  }
   browser: any;
   browserOpts: {
     port: number;
@@ -34,8 +40,9 @@ class Lighthouse implements Auditor {
   constructor() {
     this.timestamp = new Date().toISOString();
     this.Ready = new Promise((resolve, reject) => {
-      chromeLauncher.launch({chromeFlags: opts.chromeFlags}).then(result => {
+      chromeLauncher.launch(this.browserOpts).then(result => {
         this.browser = result; 
+        resolve(this.browser);
       }).catch(reject);
     });
   }
@@ -54,3 +61,20 @@ return lighthouse(url, opts, config).then(results => {
   return chrome.kill().then(() => results.report)
 });
  */
+
+
+/******
+ * TEST
+ ******/
+
+describe('Headlight', () => {
+  describe('Ready Function', () => {
+    let worker = new Headlight();
+    it('has a browser process', () => {
+      return worker.Ready.then(()=>{
+        expect(worker.browser.port).to.equal(3040);
+      });
+    });
+  });
+});
+
