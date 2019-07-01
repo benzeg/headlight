@@ -20,48 +20,47 @@ class Headlight implements Auditor {
   queue: Array<Page> = [];
   addToQueue(p: Page) {
     this.queue.push(p); 
-  }
-  browser: any;
-  browserOpts: {
-    port: number;
-    chromeFlags: Array<string>;
+  };
+  browser: {
+    options: object;
+    process: any;
   } = {
-    port: 3040,
-    chromeFlags: ['--headless', '--disable-gpu']
-  }
+    options: {
+      port: 3040,
+      chromeFlags: ['--headless', '--disable-gpu']
+    },
+    process: null
+  };
   lighthouseConfig: object = {
     extends: 'lighthouse:default',
     settings: {
       output: ['json'],
       onlyAudits: [],
     }
-  }
+  };
   public Ready: Promise<any>;
   constructor() {
     this.timestamp = new Date().toISOString();
     this.Ready = new Promise((resolve, reject) => {
-      chromeLauncher.launch(this.browserOpts).then(result => {
-        this.browser = result; 
-        resolve(this.browser);
+      chromeLauncher.launch(this.browser.options).then(result => {
+        this.browser.process = result; 
+        resolve(this.browser.process);
       }).catch(reject);
     });
   }
   async disconnect(): Promise<any> {
-    return await this.browser.kill();
+    return await this.browser.process.kill();
+  }
+  async run(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      
+    });
+  }
+  async audit(p: Page) {
+    const res = await lighthouse(p.url, this.browser.options, this.lighthouseConfig); 
+    return res.lhr;
   }
 }
-
-/*
-opts.port = chrome.port;
-return lighthouse(url, opts, config).then(results => {
-  // use results.lhr for the JS-consumeable output
-  // https://github.com/GoogleChrome/lighthouse/blob/master/types/lhr.d.ts
-  // use results.report for the HTML/JSON/CSV output as a string
-  // use results.artifacts for the trace/screenshots/other specific case you need (rarer)
-  return chrome.kill().then(() => results.report)
-});
- */
-
 
 /******
  * TEST
@@ -72,7 +71,16 @@ describe('Headlight', () => {
     let worker = new Headlight();
     it('has a browser process', () => {
       return worker.Ready.then(()=>{
-        expect(worker.browser.port).to.equal(3040);
+        expect(worker.browser.process.port).to.equal(3040);
+      });
+    });
+  });
+  describe('audit Function', () => {
+    let worker = new Headlight();
+    it('outputs an object', () => {
+      const page = { url: 'https://www.madison-reed.com' }; 
+      worker.audit(page).then((output) => {
+        expect(output).to.be.an('object');
       });
     });
   });
