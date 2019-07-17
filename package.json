@@ -16,8 +16,8 @@
     "ts-node": "^8.3.0"
   },
   "dependencies": {
-    "chrome-launcher": "^0.10.7",
     "lighthouse": "4.0.0",
+    "puppeteer": "^1.18.1",
     "typescript": "^3.5.2"
   }
 }
