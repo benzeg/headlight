@@ -1,4 +1,4 @@
-import Headlight from './index';
+import { Headlight } from './index';
 import { expect } from 'chai';
 import 'mocha';
 
@@ -11,7 +11,7 @@ describe('Headlight', function() {
     });
   });
   describe('audit Function', function() {
-    this.timeout(6000); // worker's audit process takes a long time
+    this.timeout(10000); // worker's audit process takes a long time
     let worker = new Headlight();
     it('outputs an object', async function() {
       const page = { url: 'https://www.madison-reed.com' }; 
@@ -20,4 +20,3 @@ describe('Headlight', function() {
     });
   });
 });
-
