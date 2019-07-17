@@ -1,25 +1,21 @@
 import * as puppeteer from 'puppeteer';
 import * as lighthouse from 'lighthouse';
 
-interface Page {
+interface Link {
   url: string;
 }
 
 interface Auditor {
   readonly timestamp: string;
   result: Array<object>;
-  queue: Array<Page>;
-  addToQueue(p: Page): void;
-  audit(p: Page): any; 
+  queue: Array<Link>;
+  audit(l: Link): object; 
 }
 
 export class Headlight implements Auditor {
   timestamp = new Date().toISOString();
   result = [];
   queue = [];
-  addToQueue(p: Page) {
-    this.queue.push(p); 
-  };
   browser: {
     options: object;
     process: any;
@@ -55,9 +51,29 @@ export class Headlight implements Auditor {
       
     });
   }
-  async audit(p: Page) {
-    const res = await lighthouse(p.url, { port: 3040 }, this.lighthouseConfig); 
+  async audit(l: Link) {
+    const res = await lighthouse(l.url, { port: 3040 }, this.lighthouseConfig); 
     return res.lhr;
   }
 }
 
+interface Page extends Link {
+  readonly document: object; 
+}
+
+interface Collector {
+  history: object;
+  queue: Array<Link>;
+  collect(p: Page): void; 
+}
+
+export class SiteCrawler implements Collector {
+  history = new Map(); 
+  queue = [];
+  constructor(queue: Array<Link>) {
+    this.queue = queue;
+  }
+  collect(p: Page) {
+      // to-do 
+  }
+}
