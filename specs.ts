@@ -7,16 +7,16 @@ describe('Headlight', function() {
     let worker = new Headlight();
     it('has a browser process', async function() {
       await worker.Ready;
-      expect(worker.browser.process.port).to.equal(3040);
+      expect(worker.browser.process).to.be.an('object');
     });
   });
   describe('audit Function', function() {
-    this.timeout(10000); // worker's audit process takes a long time
+    this.timeout(0);
     let worker = new Headlight();
     it('outputs an object', async function() {
       const page = { url: 'https://www.madison-reed.com' }; 
       const output = await worker.audit(page);
-      expect(output).to.be.a('object');
+      expect(output).to.be.an('object');
     });
   });
 });

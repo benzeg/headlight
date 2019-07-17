@@ -1,4 +1,4 @@
-import * as chromeLauncher from 'chrome-launcher';
+import * as puppeteer from 'puppeteer';
 import * as lighthouse from 'lighthouse';
 
 interface Page {
@@ -10,12 +10,13 @@ interface Auditor {
   result: Array<object>;
   queue: Array<Page>;
   addToQueue(p: Page): void;
+  audit(p: Page): any; 
 }
 
-export default class Headlight implements Auditor {
-  timestamp: string;
-  result: Array<object> = [];
-  queue: Array<Page> = [];
+export class Headlight implements Auditor {
+  timestamp = new Date().toISOString();
+  result = [];
+  queue = [];
   addToQueue(p: Page) {
     this.queue.push(p); 
   };
@@ -24,8 +25,7 @@ export default class Headlight implements Auditor {
     process: any;
   } = {
     options: {
-      port: 3040,
-      chromeFlags: ['--headless', '--disable-gpu']
+      args: ['--headless', '--remote-debugging-port=3040']
     },
     process: null
   };
@@ -38,16 +38,17 @@ export default class Headlight implements Auditor {
   };
   public Ready: Promise<any>;
   constructor() {
-    this.timestamp = new Date().toISOString();
-    this.Ready = new Promise((resolve, reject) => {
-      chromeLauncher.launch(this.browser.options).then(result => {
-        this.browser.process = result; 
-        resolve(this.browser.process);
-      }).catch(reject);
-    });
+    this.Ready =  (async () => {
+      try {
+        this.browser.process = await puppeteer.launch(this.browser.options);  
+      } catch(e) {
+        console.error(e);
+      }
+      return;
+    })();
   }
   async disconnect(): Promise<any> {
-    return await this.browser.process.kill();
+    return await this.browser.process.close();
   }
   async run(): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -55,7 +56,8 @@ export default class Headlight implements Auditor {
     });
   }
   async audit(p: Page) {
-    const res = await lighthouse(p.url, this.browser.options, this.lighthouseConfig); 
+    const res = await lighthouse(p.url, { port: 3040 }, this.lighthouseConfig); 
     return res.lhr;
   }
 }
+
