@@ -15,14 +15,14 @@ describe('Headlight', function() {
     this.timeout(0);
     let worker = new Headlight();
     it('outputs an object', async function() {
-      const page = { url: 'https://www.madison-reed.com' }; 
-      const output = await worker.audit(page);
+      const link = { url: 'https://www.madison-reed.com' }; 
+      const output = await worker.audit(link);
       expect(output).to.be.an('object');
     });
   });
 });
 
-describe('SiteCrawler', function() {
+describe('Historian', function() {
   describe('queue', function() {
     test('addToQueue', function() {
       
