@@ -73,7 +73,8 @@ export class SiteCrawler implements Collector {
   constructor(queue: Array<Link>) {
     this.queue = queue;
   }
-  collect(p: Page) {
+  addToQueue(l: Link) {
       // to-do 
+
   }
 }
