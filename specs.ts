@@ -10,6 +10,7 @@ describe('Headlight', function() {
       expect(worker.browser.process).to.be.an('object');
     });
   });
+
   describe('audit Function', function() {
     this.timeout(0);
     let worker = new Headlight();
@@ -18,5 +19,23 @@ describe('Headlight', function() {
       const output = await worker.audit(page);
       expect(output).to.be.an('object');
     });
+  });
+});
+
+describe('SiteCrawler', function() {
+  describe('queue', function() {
+    test('addToQueue', function() {
+      
+    });
+
+    test('dequeue', function() {
+
+    });
+  });
+
+  describe('link collector', function() {
+    test('get links', () => {
+
+    })
   });
 });
