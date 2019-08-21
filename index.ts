@@ -12,7 +12,7 @@ export class Page implements Link {
     this.url = u;
   }
   addHref(h) {
-
+    //requires utils 
   }
 } 
 
@@ -81,12 +81,22 @@ export class Historian implements Collector {
   }
   addToQueue(l: Link) {
     this.queue.push(l);
-    if(!this.busy) {
+    if (!this.busy) {
       this.dequeue();
     }
   }
-  dequeue() {
-    const l = this.queue.pop();      
+  async dequeue() {
+    if (this.busy) {
+      return this.delayDequeue();
+    }
+
+    let i = 0;
+
+    while (i < 20 && this.queue.length) {
+      const l = this.queue.pop();
+      this.accessibilityScan(l);
+      i++;
+    }
   }
   async accessibilityScan(l: Link) {
     await this.worker.Ready;
