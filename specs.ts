@@ -1,10 +1,16 @@
-import { Headlight } from './index';
+import { Headlight, Historian } from './index';
 import { expect } from 'chai';
 import 'mocha';
+import { worker } from 'cluster';
 
 describe('Headlight', function() {
+  const worker = new Headlight();
+
+  after(function() {
+    worker.disconnect();
+  });
+
   describe('Ready Function', function() {
-    let worker = new Headlight();
     it('has a browser process', async function() {
       await worker.Ready;
       expect(worker.browser.process).to.be.an('object');
@@ -13,29 +19,21 @@ describe('Headlight', function() {
 
   describe('audit Function', function() {
     this.timeout(0);
-    let worker = new Headlight();
+
     it('outputs an object', async function() {
-      const link = { url: 'https://www.madison-reed.com' }; 
+      const link = { url: 'https://benzeg.github.io' }; 
       const output = await worker.audit(link);
       expect(output).to.be.an('object');
     });
   });
-});
 
-describe('Historian', function() {
-  describe('queue', function() {
-    test('addToQueue', function() {
-      
+  describe('getHrefs', function() {
+    this.timeout(0);
+
+    it('outputs an array', async function() {
+      const link = { url: 'https://benzeg.github.io' };
+      const output = await worker.getHrefs(link);
+      expect(output).to.be.an('array');
     });
-
-    test('dequeue', function() {
-
-    });
-  });
-
-  describe('link collector', function() {
-    test('get links', () => {
-
-    })
   });
 });
