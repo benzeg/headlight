@@ -7,11 +7,12 @@ interface Link {
 
 export class Page implements Link {
   url = '';
+  audits = [];
   hrefs = [];
-  constructor(u: string) {
-    this.url = u;
+  constructor(url: string) {
+    this.url = url;
   }
-  addHref(h) {
+  addHref(href: string) {
     //requires utils 
   }
 } 
@@ -36,6 +37,7 @@ export class Headlight implements Auditor {
     extends: 'lighthouse:default',
     settings: {
       output: ['json'],
+      onlyCategories: ['accessibility'],
       onlyAudits: [],
     }
   };
@@ -50,17 +52,18 @@ export class Headlight implements Auditor {
       return;
     })();
   }
-  async disconnect(): Promise<any> {
+  async disconnect() {
     return await this.browser.process.close();
   }
   async audit(l: Link) {
     const res = await lighthouse(l.url, { port: 3040 }, this.lighthouseConfig); 
-    return res.lhr;
+    return res.lhr.audits;
   }
   async getHrefs(l: Link) {
     const page = await this.browser.process.newPage();
-    await page.goto('https://example.com');
+    await page.goto(l.url);
     const hrefs = page.$$('a');
+    return hrefs;
   }
 }
 
@@ -68,42 +71,69 @@ interface Collector {
   history: object;
   queue: Array<Link>;
   busy: Boolean;
-  worker: Auditor;
+  worker: Auditor | Array<any>;
 };
 
 export class Historian implements Collector {
   history = new Map(); 
   queue = [];
   busy = false;
-  worker = new Headlight(); 
-  constructor(queue: Array<Link>) {
+  worker = [];
+  dispatcher = new Sequencer(20);
+
+  constructor(queue?: Array<Link>) {
     this.queue = queue;
   }
+
   addToQueue(l: Link) {
     this.queue.push(l);
     if (!this.busy) {
       this.dequeue();
     }
   }
-  async dequeue() {
-    if (this.busy) {
-      return this.delayDequeue();
-    }
 
+  async dequeue() {
+    this.busy = true;
+    const jobs = [];
     let i = 0;
 
     while (i < 20 && this.queue.length) {
-      const l = this.queue.pop();
-      this.accessibilityScan(l);
+
       i++;
     }
+
+    if (this.queue.length > 0) {
+      this.dequeue();
+    } else {
+      this.busy = false;
+    }
   }
-  async accessibilityScan(l: Link) {
-    await this.worker.Ready;
-    const report = this.worker.audit(l);
+
+}
+
+interface Counter {
+  count: number;
+  step(): number;
+}
+
+export class Sequencer implements Counter {
+  limit: number;
+  count = null;
+  constructor(l:number) {
+    this.limit = l;
   }
-  async getNodes(l: Link) {
-    await this.worker.Ready;
-    const hrefs = this.worker.getHrefs(l);
+  step() {
+    if (this.count === null) {
+      this.count = 0;
+    } else {
+      const next = this.count + 1;
+      if (next === this.limit) {
+        this.count = 0;
+      } else {
+        this.count = next;
+      }
+    }
+
+    return this.count;
   }
 }
