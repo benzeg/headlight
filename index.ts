@@ -79,8 +79,9 @@ export class Historian implements Collector {
   queue = [];
   busy = false;
   worker = [];
-  dispatcher = new Sequencer(20);
-
+  numCPUs = require('os').cpus().length;
+  dispatcher = new Sequencer(this.numCPUs);
+ 
   constructor(queue?: Array<Link>) {
     this.queue = queue;
   }
@@ -97,8 +98,8 @@ export class Historian implements Collector {
     const jobs = [];
     let i = 0;
 
-    while (i < 20 && this.queue.length) {
-
+    while (i < this.numCPUs && this.queue.length) {
+      const pid = this.dispatcher.step();
       i++;
     }
 
