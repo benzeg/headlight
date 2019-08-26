@@ -41,6 +41,7 @@ export class Headlight implements Auditor {
     return await this.browser.process.close();
   }
   async audit(l: Link) {
+    console.log('in audit', l)
     await this.Ready;
     const res = await lighthouse(l.url, { port: process.env.PORT_NUM }, this.lighthouseConfig); 
     return res.lhr.audits;

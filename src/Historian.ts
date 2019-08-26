@@ -1,5 +1,5 @@
 import { Link } from './Page';
-import { Auditor, Headlight } from './Headlight';
+import { Auditor } from './Headlight';
 import { Sequencer } from './Sequencer';
 import { fork } from 'child_process';
 import { join } from 'path';
@@ -19,12 +19,14 @@ export class Historian implements Collector {
   numCPUs = require('os').cpus().length;
   dispatcher = new Sequencer(this.numCPUs);
   timeout = null;
+  canGetReport = false;
  
   constructor(queue?: Array<Link>) {
     this.queue = queue || [];
   }
 
   addToQueue(l: Link) {
+    this.canGetReport = false;
     this.queue.push(l);
     if (!this.busy) {
       this.dequeue();
@@ -35,23 +37,26 @@ export class Historian implements Collector {
     this.busy = true;
 
     let i = 0;
-    while (i < this.numCPUs && this.queue.length) {
+    while (i < this.numCPUs && !!this.queue.length) {
       const pid = this.dispatcher.step();
       if (!this.worker[pid]) {
-        this.worker[pid] = fork(join(__dirname, './headlightProcess.ts'), ['-r', 'ts-node/register'], { env: { PORT_NUM: 3000 + pid }});
+        this.worker[pid] = fork(join(__dirname, './HeadlightProcess.js'), [], { env: { PORT_NUM: 3000 + pid }});
       }
       const link = this.queue.pop();
       this.worker[pid].send(link);
-      this.worker[pid].on('message', async(audit) => {
-        const res = await audit; 
-        this.history[link.url] =  res;
-      })
+      this.worker[pid].on('message', (audit) => {
+        console.log('historian get message back from Headlight process', audit)
+        this.history[link.url] = audit;
+        if (!this.queue.length && !this.timeout) {
+          this.canGetReport = true;
+        }
+      });
       i++;
     }
 
-    if (this.queue.length > 0 && !this.timeout) {
+    if (!!this.queue.length && !this.timeout) {
       this.timeout = setTimeout(this.dequeue, 2000);
-    } else if(this.queue.length === 0) {
+    } else if (!this.queue.length) {
       if (this.timeout) {
         clearTimeout(this.timeout);
         this.timeout = null;
@@ -60,8 +65,12 @@ export class Historian implements Collector {
     }
   }
 
-  async getReport() {
-    await Promise.all(Object.values(this.history));
-    return this.history;
+  getReport() {
+    if (this.canGetReport) {
+      return this.history;
+    } else {
+      console.log();
+    }
+
   }
 }
