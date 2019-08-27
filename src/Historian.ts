@@ -3,6 +3,8 @@ import { Auditor } from './Headlight';
 import { Sequencer } from './Sequencer';
 import { fork } from 'child_process';
 import { join } from 'path';
+import { appendFileSync, fstat } from 'fs';
+import * as path from 'path';
 
 export interface Collector {
   history: object;
@@ -12,6 +14,7 @@ export interface Collector {
 };
 
 export class Historian implements Collector {
+  filename: string;
   history = {}; 
   queue: Array<Link>;
   busy = false;
@@ -19,14 +22,13 @@ export class Historian implements Collector {
   numCPUs = require('os').cpus().length;
   dispatcher = new Sequencer(this.numCPUs);
   timeout = null;
-  canGetReport = false;
  
-  constructor(queue?: Array<Link>) {
+  constructor({ filename, queue }: { filename: string, queue?: Array<Link> }) {
+    this.filename = filename;
     this.queue = queue || [];
   }
 
   addToQueue(l: Link) {
-    this.canGetReport = false;
     this.queue.push(l);
     if (!this.busy) {
       this.dequeue();
@@ -45,11 +47,7 @@ export class Historian implements Collector {
       const link = this.queue.pop();
       this.worker[pid].send(link);
       this.worker[pid].on('message', (audit) => {
-        console.log('historian get message back from Headlight process', audit)
         this.history[link.url] = audit;
-        if (!this.queue.length && !this.timeout) {
-          this.canGetReport = true;
-        }
       });
       i++;
     }
@@ -65,12 +63,7 @@ export class Historian implements Collector {
     }
   }
 
-  getReport() {
-    if (this.canGetReport) {
-      return this.history;
-    } else {
-      console.log();
-    }
-
+  appendReport() {
+    appendFileSync(path.join(__dirname, 'reports', this.filename), JSON.stringify(this.history));
   }
 }
