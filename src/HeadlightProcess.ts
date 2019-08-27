@@ -13,5 +13,5 @@ process.on('message', (l: Link) => {
 process.on('exit', () => {
   worker.disconnect();
   console.log('headlight disconnected');
-  process.exit();
+  process.disconnect();
 });
