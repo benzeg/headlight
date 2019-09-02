@@ -4,7 +4,7 @@
   "description": "",
   "main": "specs.js",
   "scripts": {
-    "test": "mocha -r ts-node/register specs.ts"
+    "test": "PORT_NUM=3001 mocha -r ts-node/register specs.ts"
   },
   "author": "",
   "license": "ISC",
