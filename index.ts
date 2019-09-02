@@ -1,5 +1,5 @@
 import { Historian } from './src/Historian';
 
-const historian = new Historian({ filename: 'test.json' });
+const historian = new Historian();
 
-historian.addToQueue({ url: 'https://benzeg.github.io'});
+historian.addToQueue({ url: 'https://www.madison-reed.com'});
