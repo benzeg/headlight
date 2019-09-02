@@ -3,8 +3,6 @@ import { Auditor } from './Headlight';
 import { Sequencer } from './Sequencer';
 import { fork } from 'child_process';
 import { join } from 'path';
-import { appendFileSync, fstat } from 'fs';
-import * as path from 'path';
 
 export interface Collector {
   history: object;
@@ -14,7 +12,6 @@ export interface Collector {
 };
 
 export class Historian implements Collector {
-  filename: string;
   history = {}; 
   queue: Array<Link>;
   busy = false;
@@ -23,8 +20,7 @@ export class Historian implements Collector {
   dispatcher = new Sequencer(this.numCPUs);
   timeout = null;
  
-  constructor({ filename, queue }: { filename: string, queue?: Array<Link> }) {
-    this.filename = filename;
+  constructor(queue?: Array<Link>) {
     this.queue = queue || [];
   }
 
@@ -47,6 +43,7 @@ export class Historian implements Collector {
       const link = this.queue.pop();
       this.worker[pid].send(link);
       this.worker[pid].on('message', (audit) => {
+        console.log('**********', audit);
         this.history[link.url] = audit;
       });
       i++;
@@ -61,9 +58,5 @@ export class Historian implements Collector {
       }
       this.busy = false;
     }
-  }
-
-  appendReport() {
-    appendFileSync(path.join(__dirname, 'reports', this.filename), JSON.stringify(this.history));
   }
 }
