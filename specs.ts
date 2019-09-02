@@ -1,7 +1,7 @@
-import { Headlight, Historian } from './index';
+import { Headlight } from './src/Headlight';
+import { Historian } from './src/Historian';
 import { expect } from 'chai';
 import 'mocha';
-import { worker } from 'cluster';
 
 describe('Headlight', function() {
   const worker = new Headlight();
