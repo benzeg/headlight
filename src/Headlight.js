@@ -90,7 +90,9 @@ var Headlight = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.Ready];
+                    case 0:
+                        console.log('in audit', l);
+                        return [4 /*yield*/, this.Ready];
                     case 1:
                         _a.sent();
                         return [4 /*yield*/, lighthouse(l.url, { port: process.env.PORT_NUM }, this.lighthouseConfig)];
