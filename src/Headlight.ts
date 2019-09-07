@@ -1,4 +1,5 @@
 import * as puppeteer from 'puppeteer';
+// @ts-ignore
 import * as lighthouse from 'lighthouse';
 import { Link } from './Page';
 
