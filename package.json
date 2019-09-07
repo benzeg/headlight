@@ -4,7 +4,7 @@
   "description": "",
   "main": "specs.js",
   "scripts": {
-    "test": "PORT_NUM=3001 mocha -r ts-node/register specs.ts"
+    "test": "PORT_NUM=3001 mocha -r ts-node/register ./src/**.spec.ts"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +16,7 @@
     "ts-node": "^8.3.0"
   },
   "dependencies": {
+    "@types/puppeteer": "^1.19.1",
     "lighthouse": "4.0.0",
     "puppeteer": "^1.18.1",
     "typescript": "^3.5.2"
