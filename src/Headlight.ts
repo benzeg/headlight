@@ -29,20 +29,12 @@ export class Headlight implements Auditor {
   };
   public Ready: Promise<any>;
   constructor() {
-    this.Ready =  (async () => {
-      try {
-        this.browser.process = await puppeteer.launch(this.browser.options);  
-      } catch(e) {
-        console.error(e);
-      }
-      return;
-    })();
+    this.Ready =  (async () => this.browser.process = await puppeteer.launch(this.browser.options))();
   }
   async disconnect() {
     return await this.browser.process.close();
   }
   async audit(l: Link) {
-    console.log('in audit', l)
     await this.Ready;
     const res = await lighthouse(l.url, { port: process.env.PORT_NUM }, this.lighthouseConfig); 
     return res.lhr.audits;
