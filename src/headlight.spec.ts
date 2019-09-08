@@ -2,38 +2,35 @@ import { Headlight } from './Headlight';
 import { expect } from 'chai';
 import 'mocha';
 
-describe('Headlight', function() {
+describe('Headlight', () => {
   const worker = new Headlight();
 
-  after(function() {
+  after(() => {
     worker.disconnect();
   });
 
-  describe('Ready Function', function() {
-    it('has a browser process', function(done) {
-      worker.Ready.then(()=> {
-        expect(worker.browser.process).to.be.an('object');
-        done();
-      });
+  describe('Ready Function', () => {
+    it('has a browser process', async () => {
+      await worker.Ready;
+      expect(worker.browser.process).to.be.an('object');
     });
   });
 
-  describe('audit Function', function() {
-    it('outputs an object', function(done) {
+  describe('audit Function', () => {
+    it('outputs an object', async function() {
+      this.timeout(0);
       const link = { url: 'https://benzeg.github.io' }; 
-      worker.audit(link).then((output) => {
-        expect(output).to.be.an('object');
-      }).finally(()=> done());
+      const output = await worker.audit(link);
+      expect(output).to.be.an('object');
+      return;
     });
   });
 
-  describe('getHrefs', function() {
-    it('outputs an array', function(done) {
+  describe('getHrefs', () => {
+    it('outputs an array', async () => {
       const link = { url: 'https://benzeg.github.io' };
-      worker.getHrefs(link).then((output) => {
-        expect(output).to.be.an('array');
-        done();
-      });
+      const output = await worker.getHrefs(link);
+      expect(output).to.be.an('array');
     });
   });
 });
