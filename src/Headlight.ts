@@ -42,7 +42,9 @@ export class Headlight implements Auditor {
   async getHrefs(l: Link) {
     const page = await this.browser.process.newPage();
     await page.goto(l.url);
-    const hrefs = page.$$('a');
+    const hrefs = await page.$$eval('a', (hrefs:any) => hrefs.map((a:any) => {
+      return a.href
+    }));
     return hrefs;
   }
 }

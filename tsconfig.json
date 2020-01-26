@@ -10,7 +10,7 @@
     "sourceMap": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*", "test.js"
   ],
   "exclude": [
     "**/*.spec.ts"
